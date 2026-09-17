@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Préstamos</h1>
+<form method="post" action="{{ url_for('nuevo_prestamo') }}">
+    <select name="usuario_id" required>
+        <option value="">-- Usuario --</option>
+        {% for u in usuarios %}
+        <option value="{{ u.id }}">{{ u.nombre }}</option>
+        {% endfor %}
+    </select>
+    <select name="libro_id" required>
+        <option value="">-- Libro --</option>
+        {% for l in libros %}
+        <option value="{{ l.id }}">{{ l.titulo }}</option>
+        {% endfor %}
+    </select>
+    <input name="dias" type="number" min="1" value="14" title="Días de préstamo">
+    <button type="submit">Registrar préstamo</button>
+</form>
+
+<table>
+    <tr>
+        <th>ID</th><th>Usuario</th><th>Libro</th><th>Prestado</th>
+        <th>Límite</th><th>Devuelto</th><th>Estado</th><th></th>
+    </tr>
+    {% for p in prestamos %}
+    <tr>
+        <td>{{ p.id }}</td><td>{{ p.usuario }}</td><td>{{ p.libro }}</td>
+        <td>{{ p.fecha_prestamo }}</td><td>{{ p.fecha_limite }}</td>
+        <td>{{ p.fecha_devolucion or "—" }}</td><td>{{ p.estado }}</td>
+        <td>
+            {% if p.estado != 'devuelto' %}
+            <form method="post" action="{{ url_for('devolver_prestamo', prestamo_id=p.id) }}">
+                <button type="submit">Marcar devuelto</button>
+            </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,8 @@
+google-adk==1.0.0
+fastapi==0.115.0
+uvicorn[standard]==0.34.0
+pymysql==1.1.1
+pydantic==2.9.2
+python-dotenv==1.1.1
+cryptography>=42.0.0
+deprecated==1.2.18

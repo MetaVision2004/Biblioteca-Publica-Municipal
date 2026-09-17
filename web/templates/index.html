@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Sistema de Gestión — Biblioteca Pública Municipal</h1>
+<p>Administra usuarios, libros y préstamos. Incluye un agente de IA (construido con Agent Development Kit)
+que recomienda libros según el historial de cada usuario.</p>
+<ul>
+    <li><a href="{{ url_for('usuarios') }}">Gestionar usuarios</a></li>
+    <li><a href="{{ url_for('libros') }}">Gestionar catálogo de libros</a></li>
+    <li><a href="{{ url_for('prestamos') }}">Registrar préstamos y devoluciones</a></li>
+    <li><a href="{{ url_for('recomendaciones') }}">Pedir recomendación al agente de IA</a></li>
+</ul>
+{% endblock %}

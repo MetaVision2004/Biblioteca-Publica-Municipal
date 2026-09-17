@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Recomendaciones del agente de IA</h1>
+<p>El agente (construido con Agent Development Kit) revisa el historial de préstamos del usuario
+y sugiere libros del catálogo que podrían interesarle.</p>
+
+<form method="post">
+    <select name="usuario_id" required>
+        <option value="">-- Selecciona un usuario --</option>
+        {% for u in usuarios %}
+        <option value="{{ u.id }}">{{ u.nombre }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Obtener recomendación</button>
+</form>
+
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+
+{% if resultado %}
+<h2>Sugerencia</h2>
+<p>{{ resultado.recomendacion }}</p>
+{% endif %}
+{% endblock %}

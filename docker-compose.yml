@@ -1,0 +1,67 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: biblioteca_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${DB_NAME:-biblioteca}
+      MYSQL_USER: ${DB_USER:-biblioteca_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-biblioteca_pass}
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data_v2:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - biblioteca_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  agent:
+    build: ./agent
+    container_name: biblioteca_agent
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_USER: ${DB_USER:-biblioteca_user}
+      DB_PASSWORD: ${DB_PASSWORD:-biblioteca_pass}
+      DB_NAME: ${DB_NAME:-biblioteca}
+      ADK_MODEL: ${ADK_MODEL:-gemini-2.0-flash}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - biblioteca_net
+
+  web:
+    build: ./web
+    container_name: biblioteca_web
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_USER: ${DB_USER:-biblioteca_user}
+      DB_PASSWORD: ${DB_PASSWORD:-biblioteca_pass}
+      DB_NAME: ${DB_NAME:-biblioteca}
+      AGENT_URL: http://agent:8001
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key}
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+      agent:
+        condition: service_started
+    networks:
+      - biblioteca_net
+
+volumes:
+  db_data_v2:
+
+networks:
+  biblioteca_net:
+    driver: bridge
