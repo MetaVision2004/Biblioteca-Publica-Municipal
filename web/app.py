@@ -12,6 +12,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 DB_CONFIG = dict(
     host=os.environ.get("DB_HOST", "127.0.0.1"),
+    port=int(os.environ.get("DB_PORT", "3306")),
     user=os.environ.get("DB_USER", "root"),
     password=os.environ.get("DB_PASSWORD", ""),
     database=os.environ.get("DB_NAME", "biblioteca"),
@@ -173,7 +174,7 @@ def recomendaciones():
             resp = requests.post(
                 f"{AGENT_URL}/recomendar",
                 json={"usuario_id": usuario_id},
-                timeout=15,
+                timeout=(5, 60),
             )
             resp.raise_for_status()
             resultado = resp.json()
@@ -191,4 +192,4 @@ def recomendaciones():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)

@@ -7,11 +7,17 @@
 </head>
 <body>
     <nav>
-        <a href="{{ url_for('index') }}">Inicio</a>
-        <a href="{{ url_for('usuarios') }}">Usuarios</a>
-        <a href="{{ url_for('libros') }}">Libros</a>
-        <a href="{{ url_for('prestamos') }}">Préstamos</a>
-        <a href="{{ url_for('recomendaciones') }}">Recomendaciones (IA)</a>
+        <a class="brand" href="{{ url_for('index') }}">
+            <img src="{{ url_for('static', filename='logo.svg') }}" alt="Biblioteca Municipal">
+            <span>Biblioteca Municipal</span>
+        </a>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">Inicio</a>
+            <a href="{{ url_for('usuarios') }}">Usuarios</a>
+            <a href="{{ url_for('libros') }}">Libros</a>
+            <a href="{{ url_for('prestamos') }}">Préstamos</a>
+            <a href="{{ url_for('recomendaciones') }}">Recomendaciones (IA)</a>
+        </div>
     </nav>
     <main>
         {% with messages = get_flashed_messages() %}

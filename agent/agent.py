@@ -8,10 +8,10 @@ sobre géneros/autores que el usuario ya ha leído.
 import os
 from google.adk.agents import LlmAgent
 
-MODEL_NAME = os.environ.get("ADK_MODEL", "gemini-3.8-flash")
+MODEL_NAME = os.environ.get("ADK_MODEL", "gemini-2.0-flash")
 
 
-def obtener_catalogo_disponible(categoria: str = "") -> dict:
+def obtener_catalogo_disponible(categoria: str) -> dict:
     """Herramienta del agente: no se usa directamente aquí porque el catálogo
     y el historial se inyectan en el prompt desde el servicio `main.py`.
     Se deja como ejemplo de herramienta ADK por si se conecta a una API real."""
