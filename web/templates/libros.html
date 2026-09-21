@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Catálogo de libros</h1>
-<form method="post" action="{{ url_for('nuevo_libro') }}">
+<div class="page-heading"><div><p class="eyebrow">Colección</p><h1>Catálogo de libros</h1><p>Administra títulos, autores, categorías y ejemplares disponibles.</p></div></div>
+<form class="data-form" method="post" action="{{ url_for('nuevo_libro') }}">
     <input name="titulo" placeholder="Título" required>
     <input name="autor" placeholder="Autor" required>
     <input name="categoria" placeholder="Categoría">
@@ -9,7 +9,7 @@
     <input name="copias" type="number" min="1" value="1" placeholder="Copias">
     <button type="submit">Agregar</button>
 </form>
-<table>
+{% if libros %}<table>
     <tr><th>ID</th><th>Título</th><th>Autor</th><th>Categoría</th><th>Disponibles</th><th>Totales</th></tr>
     {% for l in libros %}
     <tr>
@@ -17,5 +17,5 @@
         <td>{{ l.categoria }}</td><td>{{ l.copias_disponibles }}</td><td>{{ l.copias_totales }}</td>
     </tr>
     {% endfor %}
-</table>
+ </table>{% else %}<p class="empty">Todavía no hay libros en el catálogo.</p>{% endif %}
 {% endblock %}

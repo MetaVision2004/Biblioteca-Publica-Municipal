@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Préstamos</h1>
-<form method="post" action="{{ url_for('nuevo_prestamo') }}">
+<div class="page-heading"><div><p class="eyebrow">Circulación</p><h1>Préstamos</h1><p>Controla entregas, fechas límite y devoluciones del catálogo.</p></div></div>
+<form class="data-form" method="post" action="{{ url_for('nuevo_prestamo') }}">
     <select name="usuario_id" required>
         <option value="">-- Usuario --</option>
         {% for u in usuarios %}
@@ -18,7 +18,7 @@
     <button type="submit">Registrar préstamo</button>
 </form>
 
-<table>
+{% if prestamos %}<table>
     <tr>
         <th>ID</th><th>Usuario</th><th>Libro</th><th>Prestado</th>
         <th>Límite</th><th>Devuelto</th><th>Estado</th><th></th>
@@ -27,7 +27,7 @@
     <tr>
         <td>{{ p.id }}</td><td>{{ p.usuario }}</td><td>{{ p.libro }}</td>
         <td>{{ p.fecha_prestamo }}</td><td>{{ p.fecha_limite }}</td>
-        <td>{{ p.fecha_devolucion or "—" }}</td><td>{{ p.estado }}</td>
+        <td>{{ p.fecha_devolucion or "-" }}</td><td><span class="status {{ p.estado }}">{{ p.estado }}</span></td>
         <td>
             {% if p.estado != 'devuelto' %}
             <form method="post" action="{{ url_for('devolver_prestamo', prestamo_id=p.id) }}">
@@ -37,5 +37,5 @@
         </td>
     </tr>
     {% endfor %}
-</table>
+ </table>{% else %}<p class="empty">Todavía no hay préstamos registrados.</p>{% endif %}
 {% endblock %}

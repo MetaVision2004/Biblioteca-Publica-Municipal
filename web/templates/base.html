@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Biblioteca Municipal</title>
+    <title>{% block title %}Biblioteca Municipal{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -16,7 +16,7 @@
             <a href="{{ url_for('usuarios') }}">Usuarios</a>
             <a href="{{ url_for('libros') }}">Libros</a>
             <a href="{{ url_for('prestamos') }}">Préstamos</a>
-            <a href="{{ url_for('recomendaciones') }}">Recomendaciones (IA)</a>
+            <a href="{{ url_for('recomendaciones') }}">Asistente IA</a>
         </div>
     </nav>
     <main>

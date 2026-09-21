@@ -28,7 +28,22 @@ def get_conn():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    conn = get_conn()
+    with conn.cursor() as cur:
+        cur.execute("SELECT COUNT(*) AS total FROM usuarios")
+        usuarios_total = cur.fetchone()["total"]
+        cur.execute("SELECT COUNT(*) AS total, COALESCE(SUM(copias_disponibles), 0) AS disponibles FROM libros")
+        libros_resumen = cur.fetchone()
+        cur.execute("SELECT COUNT(*) AS total FROM prestamos WHERE estado = 'activo'")
+        prestamos_activos = cur.fetchone()["total"]
+    conn.close()
+    return render_template(
+        "index.html",
+        usuarios_total=usuarios_total,
+        libros_total=libros_resumen["total"],
+        copias_disponibles=libros_resumen["disponibles"],
+        prestamos_activos=prestamos_activos,
+    )
 
 
 @app.route("/usuarios")

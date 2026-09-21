@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Recomendaciones del agente de IA</h1>
-<p>El agente (construido con Agent Development Kit) revisa el historial de préstamos del usuario
-y sugiere libros del catálogo que podrían interesarle.</p>
+<div class="page-heading"><div><p class="eyebrow">Asistente inteligente</p><h1>Recomendaciones de lectura</h1><p>El agente revisa usuarios, historial de préstamos y catálogo disponible para sugerir una próxima lectura.</p></div></div>
+<div class="agent-note"><strong>Atención personalizada:</strong> el asistente analiza los datos completos de cada usuario y no recomienda ejemplares agotados.</div>
 
-<form method="post">
+<form class="data-form" method="post">
     <select name="usuario_id" required>
         <option value="">-- Selecciona un usuario --</option>
         {% for u in usuarios %}
@@ -20,6 +19,6 @@ y sugiere libros del catálogo que podrían interesarle.</p>
 
 {% if resultado %}
 <h2>Sugerencia</h2>
-<p>{{ resultado.recomendacion }}</p>
+<div class="agent-note"><p>{{ resultado.recomendacion }}</p></div>
 {% endif %}
 {% endblock %}

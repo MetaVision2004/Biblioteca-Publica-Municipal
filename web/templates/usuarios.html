@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Usuarios</h1>
-<form method="post" action="{{ url_for('nuevo_usuario') }}">
+<div class="page-heading"><div><p class="eyebrow">Comunidad</p><h1>Usuarios</h1><p>Registra y consulta las personas que utilizan la biblioteca.</p></div></div>
+<form class="data-form" method="post" action="{{ url_for('nuevo_usuario') }}">
     <input name="nombre" placeholder="Nombre" required>
     <input name="email" type="email" placeholder="Email" required>
     <input name="telefono" placeholder="Teléfono">
     <button type="submit">Registrar</button>
 </form>
-<table>
+{% if usuarios %}<table>
     <tr><th>ID</th><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Registro</th></tr>
     {% for u in usuarios %}
     <tr>
@@ -15,5 +15,5 @@
         <td>{{ u.telefono }}</td><td>{{ u.fecha_registro }}</td>
     </tr>
     {% endfor %}
-</table>
+ </table>{% else %}<p class="empty">Todavía no hay usuarios registrados.</p>{% endif %}
 {% endblock %}
