@@ -1,26 +1,4 @@
 services:
-  db:
-    image: mysql:8.0
-    container_name: biblioteca_db
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
-      MYSQL_DATABASE: ${DB_NAME:-biblioteca}
-      MYSQL_USER: ${DB_USER:-biblioteca_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-biblioteca_pass}
-    ports:
-      - "3307:3306"
-    volumes:
-      - db_data_v2:/var/lib/mysql
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    networks:
-      - biblioteca_net
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   agent:
     build: ./agent
     container_name: biblioteca_agent
@@ -28,16 +6,11 @@ services:
     ports:
       - "8001:8001"
     environment:
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_USER: ${DB_USER:-biblioteca_user}
-      DB_PASSWORD: ${DB_PASSWORD:-biblioteca_pass}
-      DB_NAME: ${DB_NAME:-biblioteca}
+      DATABASE_URL: ${DATABASE_URL}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
       ADK_MODEL: ${ADK_MODEL:-gemini-2.0-flash}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
-    depends_on:
-      db:
-        condition: service_healthy
     networks:
       - biblioteca_net
 
@@ -46,25 +19,25 @@ services:
     container_name: biblioteca_web
     restart: unless-stopped
     environment:
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_USER: ${DB_USER:-biblioteca_user}
-      DB_PASSWORD: ${DB_PASSWORD:-biblioteca_pass}
-      DB_NAME: ${DB_NAME:-biblioteca}
+      DATABASE_URL: ${DATABASE_URL}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
       AGENT_URL: http://agent:8001
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      SMTP_FROM: ${SMTP_FROM:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-Biblioteca Municipal <onboarding@resend.dev>}
       SECRET_KEY: ${SECRET_KEY:-dev-secret-key}
     ports:
       - "5000:5000"
     depends_on:
-      db:
-        condition: service_healthy
-      agent:
-        condition: service_started
+      - agent
     networks:
       - biblioteca_net
-
-volumes:
-  db_data_v2:
 
 networks:
   biblioteca_net:

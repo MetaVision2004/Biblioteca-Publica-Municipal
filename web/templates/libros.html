@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="page-heading"><div><p class="eyebrow">Colección</p><h1>Catálogo de libros</h1><p>Administra títulos, autores, categorías y ejemplares disponibles.</p></div></div>
+<form class="data-form catalog-filters" method="get">
+    <input name="q" value="{{ busqueda }}" placeholder="Buscar por título o autor">
+    <select name="categoria"><option value="">Todas las categorías</option>{% for c in categorias %}<option value="{{ c }}" {% if c == categoria %}selected{% endif %}>{{ c }}</option>{% endfor %}</select>
+    <button type="submit">Buscar</button><a href="{{ url_for('libros') }}">Limpiar</a>
+</form>
 <form class="data-form" method="post" action="{{ url_for('nuevo_libro') }}">
     <input name="titulo" placeholder="Título" required>
     <input name="autor" placeholder="Autor" required>
@@ -12,9 +17,12 @@
 {% if libros %}<table>
     <tr><th>ID</th><th>Título</th><th>Autor</th><th>Categoría</th><th>Disponibles</th><th>Totales</th></tr>
     {% for l in libros %}
-    <tr>
+    <tr class="{% if l.copias_disponibles == 0 %}out-of-stock{% endif %}">
         <td>{{ l.id }}</td><td>{{ l.titulo }}</td><td>{{ l.autor }}</td>
-        <td>{{ l.categoria }}</td><td>{{ l.copias_disponibles }}</td><td>{{ l.copias_totales }}</td>
+        <td>{{ l.categoria }}</td><td>{{ l.copias_disponibles }}{% if l.copias_disponibles == 0 %} <span class="status atrasado">Agotado</span>{% endif %}</td><td>{{ l.copias_totales }}</td>
+        <td class="row-actions"><a href="{{ url_for('editar_libro', libro_id=l.id) }}">Editar</a>
+        {% if l.copias_disponibles == 0 %}<form method="post" action="{{ url_for('nueva_reserva') }}"><input type="hidden" name="libro_id" value="{{ l.id }}"><select name="usuario_id" required><option value="">Reservar para...</option>{% for u in usuarios %}<option value="{{ u.id }}">{{ u.nombre }}</option>{% endfor %}</select><button type="submit">Reservar</button></form>{% endif %}
+        <form method="post" action="{{ url_for('eliminar_libro', libro_id=l.id) }}" onsubmit="return confirm('¿Eliminar este libro?');"><button class="button-danger" type="submit">Eliminar</button></form></td>
     </tr>
     {% endfor %}
  </table>{% else %}<p class="empty">Todavía no hay libros en el catálogo.</p>{% endif %}

@@ -3,14 +3,16 @@
 <div class="page-heading"><div><p class="eyebrow">Asistente inteligente</p><h1>Recomendaciones de lectura</h1><p>El agente revisa usuarios, historial de préstamos y catálogo disponible para sugerir una próxima lectura.</p></div></div>
 <div class="agent-note"><strong>Atención personalizada:</strong> el asistente analiza los datos completos de cada usuario y no recomienda ejemplares agotados.</div>
 
-<form class="data-form" method="post">
+<form class="data-form recommendation-form" method="post">
     <select name="usuario_id" required>
         <option value="">-- Selecciona un usuario --</option>
         {% for u in usuarios %}
-        <option value="{{ u.id }}">{{ u.nombre }}</option>
+        <option value="{{ u.id }}" {% if u.id|string == usuario_id|string %}selected{% endif %}>{{ u.nombre }}</option>
         {% endfor %}
     </select>
-    <button type="submit">Obtener recomendación</button>
+    <input type="hidden" name="session_id" value="{{ session_id or '' }}">
+    <input name="mensaje" value="{{ mensaje }}" placeholder="Ej.: quiero algo de terror corto" required>
+    <button type="submit">Preguntar</button>
 </form>
 
 {% if error %}

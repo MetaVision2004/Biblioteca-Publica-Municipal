@@ -1,6 +1,7 @@
 import asyncio
 import os
-import pymysql
+import psycopg
+from psycopg.rows import dict_row
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -14,24 +15,21 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 app = FastAPI(title="Agente de Recomendación - Biblioteca")
 
-DB_CONFIG = dict(
-    host=os.environ.get("DB_HOST", "127.0.0.1"),
-    port=int(os.environ.get("DB_PORT", "3306")),
-    user=os.environ.get("DB_USER", "root"),
-    password=os.environ.get("DB_PASSWORD", ""),
-    database=os.environ.get("DB_NAME", "biblioteca"),
-    cursorclass=pymysql.cursors.DictCursor,
-)
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
 runner = InMemoryRunner(agent=root_agent, app_name="biblioteca_agent")
 
 
 class RecomendarRequest(BaseModel):
     usuario_id: int
+    mensaje: str = "Recomiéndame una lectura según mi historial."
+    session_id: str | None = None
 
 
 def get_conn():
-    return pymysql.connect(**DB_CONFIG)
+    if not DATABASE_URL:
+        raise RuntimeError("DATABASE_URL no está configurada para Supabase")
+    return psycopg.connect(DATABASE_URL, row_factory=dict_row)
 
 
 def construir_contexto(usuario_id: int) -> str:
@@ -48,10 +46,6 @@ def construir_contexto(usuario_id: int) -> str:
         )
         historial = cur.fetchall()
 
-        cur.execute(
-            "SELECT titulo, autor, categoria FROM libros WHERE copias_disponibles > 0"
-        )
-        catalogo = cur.fetchall()
     conn.close()
 
     nombre = usuario["nombre"] if usuario else "Usuario desconocido"
@@ -59,15 +53,10 @@ def construir_contexto(usuario_id: int) -> str:
         "\n".join(f"- {h['titulo']} ({h['autor']}, {h['categoria']})" for h in historial)
         or "Sin préstamos previos."
     )
-    catalogo_txt = "\n".join(
-        f"- {c['titulo']} ({c['autor']}, {c['categoria']})" for c in catalogo
-    )
-
     return (
         f"Usuario: {nombre}\n\n"
         f"Historial de préstamos:\n{historial_txt}\n\n"
-        f"Catálogo disponible:\n{catalogo_txt}\n\n"
-        "Recomienda del catálogo disponible."
+        "Consulta el catálogo con tus herramientas antes de recomendar."
     )
 
 
@@ -114,16 +103,31 @@ def health():
 @app.post("/recomendar")
 async def recomendar(req: RecomendarRequest):
     if not os.environ.get("GOOGLE_API_KEY"):
-        return {"recomendacion": recomendacion_respaldo(req.usuario_id)}
+        return {
+            "recomendacion": "El asistente de IA no está disponible ahora. "
+            + recomendacion_respaldo(req.usuario_id),
+            "session_id": req.session_id,
+        }
 
-    prompt = construir_contexto(req.usuario_id)
+    prompt = construir_contexto(req.usuario_id) + f"\n\nPetición actual del usuario: {req.mensaje}"
 
-    last_error = None
     for attempt in range(2):
         try:
-            session = await runner.session_service.create_session(
-                app_name="biblioteca_agent", user_id=str(req.usuario_id)
-            )
+            if req.session_id and attempt == 0:
+                try:
+                    session = await runner.session_service.get_session(
+                        app_name="biblioteca_agent",
+                        user_id=str(req.usuario_id),
+                        session_id=req.session_id,
+                    )
+                except Exception:
+                    session = await runner.session_service.create_session(
+                        app_name="biblioteca_agent", user_id=str(req.usuario_id)
+                    )
+            else:
+                session = await runner.session_service.create_session(
+                    app_name="biblioteca_agent", user_id=str(req.usuario_id)
+                )
 
             texto_final = ""
             async for event in runner.run_async(
@@ -134,14 +138,20 @@ async def recomendar(req: RecomendarRequest):
                 if event.is_final_response() and event.content and event.content.parts:
                     texto_final = event.content.parts[0].text
             break
-        except Exception as exc:
-            last_error = exc
+        except Exception:
             if attempt == 0:
                 await asyncio.sleep(1)
     else:
-        return {"recomendacion": recomendacion_respaldo(req.usuario_id)}
+        return {
+            "recomendacion": "El asistente no está disponible en este momento. "
+            + recomendacion_respaldo(req.usuario_id),
+            "session_id": req.session_id,
+        }
 
-    return {"recomendacion": texto_final or "No se pudo generar una recomendación."}
+    return {
+        "recomendacion": texto_final or "No se pudo generar una recomendación.",
+        "session_id": session.id,
+    }
 
 
 if __name__ == "__main__":

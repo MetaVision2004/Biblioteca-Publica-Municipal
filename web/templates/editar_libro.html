@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">Colección</p><h1>Editar libro</h1></div></div>
+<form class="data-form edit-form" method="post">
+    <label>Título<input name="titulo" value="{{ libro.titulo }}" required></label>
+    <label>Autor<input name="autor" value="{{ libro.autor }}" required></label>
+    <label>Categoría<input name="categoria" value="{{ libro.categoria or '' }}"></label>
+    <label>ISBN<input name="isbn" value="{{ libro.isbn or '' }}"></label>
+    <label>Copias totales<input name="copias_totales" type="number" min="1" value="{{ libro.copias_totales }}" required></label>
+    <button type="submit">Guardar cambios</button><a href="{{ url_for('libros') }}">Cancelar</a>
+</form>
+{% endblock %}

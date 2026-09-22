@@ -1,20 +1,21 @@
 # Sistema de Gestión de Biblioteca Pública Municipal
 
 Proyecto de la actividad integradora — Caso 1: Biblioteca.
-Arquitectura basada en 3 servicios contenedorizados (equivalentes a las 3 VMs
-definidas: web, aplicación/agente y base de datos), desplegados con Docker Compose.
+Arquitectura basada en dos servicios contenedorizados (web y agente), con
+Supabase PostgreSQL como base de datos administrada.
 
 ## Componentes
 
 | Servicio | Descripción | Puerto |
 |----------|-------------|--------|
-| `db`     | MySQL 8.0 — usuarios, libros, préstamos | 3306 |
+| `Supabase` | PostgreSQL administrado — usuarios, libros, préstamos y reservas | externo |
 | `agent`  | Agente de IA (Agent Development Kit) que recomienda libros | 8001 (interno) |
 | `web`    | Aplicación Flask — gestión de usuarios/libros/préstamos y UI de recomendaciones | 5000 |
 
 ## Requisitos previos
 
 - Docker y Docker Compose instalados.
+- Un proyecto de Supabase y su cadena de conexión PostgreSQL.
 - Una API key de Google AI Studio (https://aistudio.google.com/apikey) para que
   el agente ADK pueda usar el modelo Gemini. Sin esta key, el resto del sistema
   (usuarios, libros, préstamos) funciona normalmente; solo la pantalla de
@@ -24,12 +25,20 @@ definidas: web, aplicación/agente y base de datos), desplegados con Docker Comp
 
 ```bash
 cp .env.example .env
-# Edita .env y coloca tu GOOGLE_API_KEY
+# Configura DATABASE_URL con la conexión PostgreSQL de Supabase.
+# Configura también SUPABASE_URL y SUPABASE_ANON_KEY desde Project Settings > API.
+# Edita también GOOGLE_API_KEY si quieres activar el agente Gemini.
+# Para notificaciones, configura SMTP_HOST/SMTP_PORT/SMTP_USERNAME/SMTP_PASSWORD
+# y SMTP_FROM, o usa RESEND_API_KEY + EMAIL_FROM como alternativa.
 
 docker compose up --build
 ```
 
 La aplicación web queda disponible en `http://localhost:5000`.
+
+El acceso administrativo usa Supabase Auth con correo y contraseña. Ejecuta el
+SQL de `db/init.sql` en Supabase, configura `SUPABASE_URL` y la clave pública
+`SUPABASE_ANON_KEY`, y crea la primera cuenta desde `/registro`.
 
 ## Estructura del proyecto
 
@@ -38,7 +47,7 @@ biblioteca-proyecto/
 ├── docker-compose.yml
 ├── .env.example
 ├── db/
-│   └── init.sql            # esquema + datos de ejemplo
+│   └── init.sql            # SQL PostgreSQL para ejecutar en Supabase
 ├── web/                     # app Flask (usuarios, libros, préstamos)
 │   ├── Dockerfile
 │   ├── requirements.txt
@@ -54,16 +63,17 @@ biblioteca-proyecto/
 
 ## Flujo del agente de IA
 
-1. La app web (`/recomendaciones`) envía el `usuario_id` al servicio del agente.
-2. `agent/main.py` arma un contexto con el historial de préstamos del usuario y
-   el catálogo disponible, consultando directamente la base de datos MySQL.
-3. El `LlmAgent` definido en `agent/agent.py` (Agent Development Kit) procesa
-   ese contexto y genera una recomendación en lenguaje natural.
-4. La respuesta se muestra en la interfaz web.
+1. La app web (`/recomendaciones`) envía el usuario, el mensaje y el `session_id`.
+2. `agent/main.py` consulta el historial en Supabase PostgreSQL y conserva la sesión
+  mediante `InMemoryRunner` para permitir preguntas de seguimiento.
+3. El `LlmAgent` usa `buscar_libros_disponibles` y `verificar_disponibilidad` como
+  tools reales con function calling; no recibe un catálogo estático inyectado.
+4. La pantalla acepta lenguaje natural, como "quiero algo de terror corto", y
+  muestra un mensaje amigable si Gemini no está disponible.
 
 ## Notas para la entrega
 
 - Cambia las contraseñas de `.env` antes de cualquier despliegue real.
-- El `init.sql` crea automáticamente las tablas y algunos datos de ejemplo la
-  primera vez que se levanta el contenedor de MySQL (volumen `db_data` vacío).
-- Si se necesita reiniciar la base de datos desde cero: `docker compose down -v`.
+- Las notificaciones usan SMTP si `SMTP_HOST` y `SMTP_FROM` están configurados; si no, se hace fallback a Resend con `RESEND_API_KEY` y `EMAIL_FROM`. Sin ningún proveedor configurado, la gestión funciona normalmente.
+- Ejecuta `db/init.sql` en el SQL Editor de Supabase para crear tablas y datos de ejemplo.
+- No se necesita un contenedor local de base de datos; `DATABASE_URL` es obligatoria.

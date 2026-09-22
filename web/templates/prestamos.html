@@ -24,7 +24,7 @@
         <th>Límite</th><th>Devuelto</th><th>Estado</th><th></th>
     </tr>
     {% for p in prestamos %}
-    <tr>
+    <tr class="{% if p.estado == 'atrasado' %}overdue-row{% endif %}">
         <td>{{ p.id }}</td><td>{{ p.usuario }}</td><td>{{ p.libro }}</td>
         <td>{{ p.fecha_prestamo }}</td><td>{{ p.fecha_limite }}</td>
         <td>{{ p.fecha_devolucion or "-" }}</td><td><span class="status {{ p.estado }}">{{ p.estado }}</span></td>

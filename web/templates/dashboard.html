@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">Panel de control</p><h1>Estadísticas de circulación</h1><p>Una lectura rápida de la actividad de la biblioteca.</p></div></div>
+<div class="stats">
+    <div class="stat"><strong>{{ totales_estado.get('activo', 0) }}</strong><span>Préstamos activos</span></div>
+    <div class="stat"><strong>{{ totales_estado.get('atrasado', 0) }}</strong><span>Préstamos atrasados</span></div>
+    <div class="stat"><strong>{{ totales_estado.get('devuelto', 0) }}</strong><span>Préstamos devueltos</span></div>
+</div>
+<div class="dashboard-grid">
+    <section><h2>Libros más prestados</h2>{% if libros_populares %}<table><tr><th>Libro</th><th>Autor</th><th>Préstamos</th></tr>{% for libro in libros_populares %}<tr><td>{{ libro.titulo }}</td><td>{{ libro.autor }}</td><td>{{ libro.total }}</td></tr>{% endfor %}</table>{% else %}<p class="empty">Todavía no hay préstamos.</p>{% endif %}</section>
+    <section><h2>Usuarios más activos</h2>{% if usuarios_activos %}<table><tr><th>Usuario</th><th>Préstamos</th></tr>{% for usuario in usuarios_activos %}<tr><td>{{ usuario.nombre }}</td><td>{{ usuario.total }}</td></tr>{% endfor %}</table>{% else %}<p class="empty">Todavía no hay actividad.</p>{% endif %}</section>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">Comunidad</p><h1>Editar usuario</h1></div></div>
+<form class="data-form edit-form" method="post">
+    <label>Nombre<input name="nombre" value="{{ usuario.nombre }}" required></label>
+    <label>Email<input name="email" type="email" value="{{ usuario.email }}" required></label>
+    <label>Teléfono<input name="telefono" value="{{ usuario.telefono or '' }}"></label>
+    <button type="submit">Guardar cambios</button><a href="{{ url_for('usuarios') }}">Cancelar</a>
+</form>
+{% endblock %}

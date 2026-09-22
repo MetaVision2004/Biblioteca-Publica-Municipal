@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == 'register' %}Crear cuenta{% else %}Iniciar sesión{% endif %} | Biblioteca Municipal{% endblock %}
+{% block content %}
+<div class="auth-panel">
+    <p class="eyebrow">Acceso seguro</p>
+    <h1>{% if mode == 'register' %}Crear cuenta{% else %}Iniciar sesión{% endif %}</h1>
+    <p>{% if mode == 'register' %}Regístrate con tu correo para acceder a la gestión de la biblioteca.{% else %}Accede para administrar usuarios, libros y préstamos.{% endif %}</p>
+    <form class="data-form auth-form" method="post">
+        {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+        <label>Correo electrónico<input name="email" type="email" autocomplete="email" required></label>
+        <label>Contraseña<input name="password" type="password" minlength="6" autocomplete="{% if mode == 'register' %}new-password{% else %}current-password{% endif %}" required></label>
+        <button type="submit">{% if mode == 'register' %}Crear cuenta{% else %}Entrar{% endif %}</button>
+    </form>
+    {% if mode == 'register' %}<p>¿Ya tienes cuenta? <a href="{{ url_for('login') }}">Inicia sesión</a>.</p>{% else %}<p>¿No tienes cuenta? <a href="{{ url_for('registro') }}">Crear una cuenta</a>.</p>{% endif %}
+</div>
+{% endblock %}

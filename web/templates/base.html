@@ -16,7 +16,12 @@
             <a href="{{ url_for('usuarios') }}">Usuarios</a>
             <a href="{{ url_for('libros') }}">Libros</a>
             <a href="{{ url_for('prestamos') }}">Préstamos</a>
+            <a href="{{ url_for('dashboard') }}">Estadísticas</a>
             <a href="{{ url_for('recomendaciones') }}">Asistente IA</a>
+            {% if session.get('user') %}
+            <span class="user-chip">{{ session['user'].get('email', 'Cuenta') }}</span>
+            <form class="logout-form" method="post" action="{{ url_for('logout') }}"><button class="button-quiet" type="submit">Salir</button></form>
+            {% endif %}
         </div>
     </nav>
     <main>

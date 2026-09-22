@@ -11,6 +11,7 @@
     <div class="stat"><strong>{{ usuarios_total }}</strong><span>Usuarios registrados</span></div>
     <div class="stat"><strong>{{ libros_total }}</strong><span>Títulos en catálogo</span></div>
     <div class="stat"><strong>{{ prestamos_activos }}</strong><span>Préstamos activos</span></div>
+    <div class="stat overdue"><strong>{{ prestamos_atrasados }}</strong><span>Préstamos atrasados</span></div>
 </div>
 <h2>Accesos rápidos</h2>
 <ul class="action-list">
@@ -18,5 +19,6 @@
     <li><a href="{{ url_for('libros') }}">Gestionar catálogo de libros</a></li>
     <li><a href="{{ url_for('prestamos') }}">Registrar préstamos y devoluciones</a></li>
     <li><a href="{{ url_for('recomendaciones') }}">Consultar al asistente IA</a></li>
+    <li><a href="{{ url_for('dashboard') }}">Ver estadísticas</a></li>
 </ul>
 {% endblock %}

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">Ficha de usuario</p><h1>{{ usuario.nombre }}</h1><p>{{ usuario.email }}{% if usuario.telefono %} · {{ usuario.telefono }}{% endif %}</p></div><a href="{{ url_for('editar_usuario', usuario_id=usuario.id) }}">Editar ficha</a></div>
+<h2>Historial de préstamos</h2>
+{% if prestamos %}<table><tr><th>Libro</th><th>Fecha de préstamo</th><th>Fecha límite</th><th>Devolución</th><th>Estado</th></tr>{% for p in prestamos %}<tr class="{% if p.estado == 'atrasado' %}overdue-row{% endif %}"><td>{{ p.titulo }}</td><td>{{ p.fecha_prestamo }}</td><td>{{ p.fecha_limite }}</td><td>{{ p.fecha_devolucion or '-' }}</td><td><span class="status {{ p.estado }}">{{ p.estado }}</span></td></tr>{% endfor %}</table>{% else %}<p class="empty">Este usuario todavía no tiene préstamos.</p>{% endif %}
+{% endblock %}
