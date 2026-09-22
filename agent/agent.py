@@ -20,7 +20,7 @@ def _get_conn():
     return psycopg.connect(database_url, row_factory=dict_row)
 
 
-def buscar_libros_disponibles(categoria: str = "", consulta: str = "") -> dict:
+def buscar_libros_disponibles(categoria: str, consulta: str) -> dict:
     """Busca en Supabase libros con copias disponibles en tiempo real.
 
     Usa esta herramienta antes de recomendar para no depender de un catálogo

@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import psycopg
 from psycopg.rows import dict_row
@@ -16,6 +17,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 app = FastAPI(title="Agente de Recomendación - Biblioteca")
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
+logger = logging.getLogger(__name__)
 
 runner = InMemoryRunner(agent=root_agent, app_name="biblioteca_agent")
 
@@ -138,7 +140,10 @@ async def recomendar(req: RecomendarRequest):
                 if event.is_final_response() and event.content and event.content.parts:
                     texto_final = event.content.parts[0].text
             break
-        except Exception:
+        except Exception as exc:
+            logger.exception("Error generando recomendación ADK")
+            if getattr(exc, "status_code", None) == 429 or attempt == 1:
+                break
             if attempt == 0:
                 await asyncio.sleep(1)
     else:
@@ -148,10 +153,14 @@ async def recomendar(req: RecomendarRequest):
             "session_id": req.session_id,
         }
 
-    return {
-        "recomendacion": texto_final or "No se pudo generar una recomendación.",
-        "session_id": session.id,
-    }
+    if not texto_final:
+        return {
+            "recomendacion": "El asistente de IA no está disponible ahora. "
+            + recomendacion_respaldo(req.usuario_id),
+            "session_id": req.session_id,
+        }
+
+    return {"recomendacion": texto_final, "session_id": session.id}
 
 
 if __name__ == "__main__":
